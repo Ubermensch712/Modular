@@ -1,0 +1,128 @@
+Codigo elaborado
+
+  clc
+% Solicitar al usuario los valores de entrada
+S0 = input('Introduce el precio inicial del activo subyacente: ');
+K = input('Introduce el precio de ejercicio: ');
+r = input('Introduce la tasa libre de riesgo: ');
+T = input('Introduce el vencimiento de la opción (en años): ');
+sigma = input('Introduce la volatilidad del activo subyacente: ');
+
+% Crear función de distribución normal
+N = @(x) 0.5 * erfc(-x/sqrt(2));
+
+% Calcular d1 y d2
+d1 = (log(S0/K) + (r + 0.5*sigma^2)*T) / (sigma*sqrt(T));
+d2 = d1 - sigma*sqrt(T);
+
+% Calcular el precio de la opción call y put
+C = S0 * N(d1) - K * exp(-r*T) * N(d2);
+P = K * exp(-r*T) * N(-d2) - S0 * N(-d1);
+
+% Crear una matriz de características
+X = [S0, K, r, T, sigma];
+
+% Crear una matriz de resultados
+Y = [C, P];
+
+% Imprimir los resultados
+disp(['El precio de la opción call es: ' num2str(C)]);
+disp(['El precio de la opción put es: ' num2str(P)]);
+
+% Ajustar la regresión lineal
+theta = pinv(X' * X) * X' * Y;
+
+% Solicitar al usuario los nuevos valores de entrada
+S0_new = input('Introduce el nuevo precio inicial del activo subyacente: ');
+K_new = input('Introduce el nuevo precio de ejercicio: ');
+r_new = input('Introduce la nueva tasa libre de riesgo: ');
+T_new = input('Introduce el nuevo vencimiento de la opción (en años): ');
+sigma_new = input('Introduce la nueva volatilidad del activo subyacente: ');
+
+% Predecir el precio de la opción call y put para un nuevo conjunto de parámetros
+X_new = [S0_new, K_new, r_new, T_new, sigma_new];
+C_new = X_new * theta(1);
+P_new = X_new * theta(2);
+
+% Imprimir los resultados
+disp(['El precio de la opción call es: ' num2str(C_new)]);
+disp(['El precio de la opción put es: ' num2str(P_new)]);
+
+% Graficar los resultados
+S = 0:150;
+d1_new = (log(S/K_new) + (r_new + 0.5*sigma_new^2)*T_new) / (sigma_new*sqrt(T_new));
+d2_new = d1_new - sigma_new*sqrt(T_new);
+C_new = S .* N(d1_new) - K_new * exp(-r_new*T_new) * N(d2_new);
+P_new = K_new * exp(-r_new*T_new) * N(-d2_new) - S .* N(-d1_new);
+    drawnow limitrate % display updates
+
+figure;
+plot(S, C_new, 'r-', S, P_new, 'b--');
+legend('Opción Call', 'Opción Put');
+xlabel('Precio del activo subyacente');
+ylabel('Precio de la opción');
+title('Precio de las opciones Call y Put');
+    drawnow limitrate % display updates
+    
+
+
+Código que se corre directo con los datos utilizados en el Modular 1
+
+% Parámetros de entrada
+S0 = 50;     % Precio inicial del activo subyacente
+K = 55;      % Precio de ejercicio
+r = 0.02;     % Tasa libre de riesgo
+T = 0.5;        % Vencimiento de la opción
+sigma = 0.2;  % Volatilidad del activo subyacente
+
+% Crear función de distribución normal
+N = @(x) 0.5 * erfc(-x/sqrt(2));
+
+% Calcular d1 y d2
+d1 = (log(S0/K) + (r + 0.5*sigma^2)*T) / (sigma*sqrt(T));
+d2 = d1 - sigma*sqrt(T);
+
+% Calcular el precio de la opción call y put
+C = S0 * N(d1) - K * exp(-r*T) * N(d2);
+P = K * exp(-r*T) * N(-d2) - S0 * N(-d1);
+
+% Crear una matriz de características
+X = [S0, K, r, T, sigma];
+
+% Crear una matriz de resultados
+Y = [C; P];
+
+% Ajustar la regresión lineal
+theta = pinv(X' * X) * X' * Y';
+% Predecir el precio de la opción call y put para un nuevo conjunto de parámetros
+S0_new = 52;
+K_new = 57;
+r_new = 0.03;
+T_new = 1;
+sigma_new = 0.25;
+
+X_new = [S0_new, K_new, r_new, T_new, sigma_new];
+C_new = X_new * theta(1);
+P_new = X_new * theta(2);
+
+% Imprimir los resultados
+disp(['El precio de la opción call es: ' num2str(C_new)]);
+disp(['El precio de la opción put es: ' num2str(P_new)]);
+
+% Crear un vector de tiempos
+t = 0:0.1:10;
+S = 0:150;
+
+% Graficar los resultados
+S = 0:150;
+d1_new = (log(S/K_new) + (r_new + 0.5*sigma_new^2)*T_new) / (sigma_new*sqrt(T_new));
+d2_new = d1_new - sigma_new*sqrt(T_new);
+C_new = S .* N(d1_new) - K_new * exp(-r_new*T_new) * N(d2_new);
+P_new = K_new * exp(-r_new*T_new) * N(-d2_new) - S .* N(-d1_new);
+
+figure;
+plot(S, C_new, 'r-', S, P_new, 'b--');
+legend('Opción Call', 'Opción Put');
+xlabel('Precio del activo subyacente');
+ylabel('Precio de la opción');
+title('Precio de las opciones Call y Put');
