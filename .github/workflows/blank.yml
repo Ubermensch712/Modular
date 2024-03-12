@@ -1,36 +1,43 @@
-% Parámetros de entrada
-S0 = 191.24;  % Precio actual de las acciones de Apple
-K = 195;      % Precio de ejercicio de la opción
-r = 0.0422;   % Tasa libre de riesgo anualizada
-T = 0.01923;  % Tiempo hasta el vencimiento en años
-sigma = 0.14; % Estimación de la volatilidad
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.special import erfc
 
-% Crear función de distribución normal
-N = @(x) 0.5 * erfc(-x/sqrt(2));
+# Parámetros de entrada
+S0 = 191.24  # Precio actual de las acciones de Apple
+K = 195      # Precio de ejercicio de la opción
+r = 0.0422   # Tasa libre de riesgo anualizada
+T = 0.01923  # Tiempo hasta el vencimiento en años
+sigma = 0.14 # Estimación de la volatilidad
 
-% Calcular d1 y d2
-d1 = (log(S0/K) + (r + 0.5*sigma^2)*T) / (sigma*sqrt(T));
-d2 = d1 - sigma*sqrt(T);
+# Crear función de distribución normal
+N = lambda x: 0.5 * erfc(-x / np.sqrt(2))
 
-% Calcular el precio de la opción call y put
-C = S0 * N(d1) - K * exp(-r*T) * N(d2);
-P = K * exp(-r*T) * N(-d2) - S0 * N(-d1);
+# Calcular d1 y d2
+d1 = (np.log(S0 / K) + (r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+d2 = d1 - sigma * np.sqrt(T)
 
-% Imprimir los resultados
-disp(['El precio de la opción call es: ' num2str(C)]);
-disp(['El precio de la opción put es: ' num2str(P)]);
+# Calcular el precio de la opción call y put
+C = S0 * N(d1) - K * np.exp(-r * T) * N(d2)
+P = K * np.exp(-r * T) * N(-d2) - S0 * N(-d1)
 
-% Crear un vector de precios del activo subyacente para graficar
-S = linspace(0, 150, 100);
+# Imprimir los resultados
+print(f'El precio de la opción call es: {C}')
+print(f'El precio de la opción put es: {P}')
 
-% Calcular precios de las opciones para diferentes precios del activo subyacente
-C_new = arrayfun(@(S) max(S * N((log(S/K) + (r + 0.5*sigma^2)*T) / (sigma*sqrt(T))) - K * exp(-r*T) * N((log(S/K) + (r + 0.5*sigma^2)*T) / (sigma*sqrt(T)) - sigma*sqrt(T)), 0), S);
-P_new = arrayfun(@(S) max(K * exp(-r*T) * N(-(log(S/K) + (r + 0.5*sigma^2)*T) / (sigma*sqrt(T)) + sigma*sqrt(T)) - S * N(-(log(S/K) + (r + 0.5*sigma^2)*T) / (sigma*sqrt(T))), 0), S);
+# Crear un vector de precios del activo subyacente para graficar
+S = np.linspace(1, 150, 100)  # Comienza desde 1 en lugar de 0
 
-% Graficar los resultados
-figure;
-plot(S, C_new, 'r-', S, P_new, 'b--');
-legend('Opción Call', 'Opción Put');
-xlabel('Precio del activo subyacente');
-ylabel('Precio de la opción');
-title('Precio de las opciones Call y Put');
+# Calcular precios de las opciones para diferentes precios del activo subyacente
+C_new = np.maximum(S * N((np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))) - K * np.exp(-r*T) * N((np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T)) - sigma*np.sqrt(T)), 0)
+P_new = np.maximum(K * np.exp(-r*T) * N(-(np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T)) + sigma*np.sqrt(T)) - S * N(-(np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))), 0)
+
+# Graficar los resultados
+plt.figure()
+plt.plot(S, C_new, 'r-', label='Opción Call')
+plt.plot(S, P_new, 'b--', label='Opción Put')
+plt.legend()
+plt.xlabel('Precio del activo subyacente')
+plt.ylabel('Precio de la opción')
+plt.title('Precio de las opciones Call y Put')
+plt.show()
+
