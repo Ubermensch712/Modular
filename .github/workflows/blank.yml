@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.special import erfc
 
 # Parámetros de entrada
@@ -23,21 +22,3 @@ P = K * np.exp(-r * T) * N(-d2) - S0 * N(-d1)
 # Imprimir los resultados
 print(f'El precio de la opción call es: {C}')
 print(f'El precio de la opción put es: {P}')
-
-# Crear un vector de precios del activo subyacente para graficar
-S = np.linspace(1, 150, 100)  # Comienza desde 1 en lugar de 0
-
-# Calcular precios de las opciones para diferentes precios del activo subyacente
-C_new = np.maximum(S * N((np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))) - K * np.exp(-r*T) * N((np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T)) - sigma*np.sqrt(T)), 0)
-P_new = np.maximum(K * np.exp(-r*T) * N(-(np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T)) + sigma*np.sqrt(T)) - S * N(-(np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))), 0)
-
-# Graficar los resultados
-plt.figure()
-plt.plot(S, C_new, 'r-', label='Opción Call')
-plt.plot(S, P_new, 'b--', label='Opción Put')
-plt.legend()
-plt.xlabel('Precio del activo subyacente')
-plt.ylabel('Precio de la opción')
-plt.title('Precio de las opciones Call y Put')
-plt.show()
-
